@@ -3,15 +3,17 @@ const cors = require("cors");
 require("dotenv").config();
 
 const connectDB = require("./config/database");
+const feedbackRoutes = require("./routes/feedbackRoutes");
 
 const app = express();
 
 // Connect to MongoDB
-connectDB();
+// connectDB();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/api/feedback", feedbackRoutes);
 
 // Test route
 app.get("/", (req, res) => {

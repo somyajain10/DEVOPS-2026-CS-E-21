@@ -1,11 +1,8 @@
-const Feedback = require("server/models/Feedback.js");
-
-// Submit new feedback
+// Submit feedback
 const createFeedback = async (req, res) => {
   try {
     const { name, email, message, rating } = req.body;
 
-    // Check required fields
     if (!name || !email || !message || !rating) {
       return res.status(400).json({
         success: false,
@@ -13,12 +10,14 @@ const createFeedback = async (req, res) => {
       });
     }
 
-    const feedback = await Feedback.create({
+    const feedback = {
+      id: Date.now(),
       name,
       email,
       message,
       rating,
-    });
+      createdAt: new Date(),
+    };
 
     res.status(201).json({
       success: true,
@@ -29,28 +28,16 @@ const createFeedback = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to submit feedback",
-      error: error.message,
     });
   }
 };
 
-// Get all feedback
+// Get feedback
 const getAllFeedback = async (req, res) => {
-  try {
-    const feedbacks = await Feedback.find().sort({ createdAt: -1 });
-
-    res.status(200).json({
-      success: true,
-      count: feedbacks.length,
-      data: feedbacks,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch feedback",
-      error: error.message,
-    });
-  }
+  res.status(200).json({
+    success: true,
+    data: [],
+  });
 };
 
 module.exports = {
