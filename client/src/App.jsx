@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Feedback from './Feedback'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import heroImg from './assets/hero.png'
@@ -114,6 +115,7 @@ function App() {
       </section>
 
       <div className="ticks"></div>
+      <Feedback />
       <section id="spacer"></section>
     </>
   )
