@@ -9,6 +9,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User");
+const authMiddleware = require("./middleware/authMiddleware");
+const roleMiddleware = require("./middleware/roleMiddleware");
 require("dotenv").config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -156,6 +158,57 @@ app.get("/api/health", (req, res) => {
     message: "Backend is healthy",
   });
 });
+
+// Protected test route
+app.get("/api/protected", authMiddleware, (req, res) => {
+  res.json({
+    success: true,
+    message: "You accessed a protected route",
+    user: req.user
+  });
+});
+
+// Student-only route
+app.get(
+  "/api/student",
+  authMiddleware,
+  roleMiddleware("student"),
+  (req, res) => {
+    res.json({
+      success: true,
+      message: "Welcome to Student Dashboard",
+      user: req.user
+    });
+  }
+);
+
+// Company-only route
+app.get(
+  "/api/company",
+  authMiddleware,
+  roleMiddleware("company"),
+  (req, res) => {
+    res.json({
+      success: true,
+      message: "Welcome to Company Dashboard",
+      user: req.user
+    });
+  }
+);
+
+// Admin-only route
+app.get(
+  "/api/admin",
+  authMiddleware,
+  roleMiddleware("admin"),
+  (req, res) => {
+    res.json({
+      success: true,
+      message: "Welcome to Admin Dashboard",
+      user: req.user
+    });
+  }
+);
 
 // Port
 const PORT = process.env.PORT || 5000;
