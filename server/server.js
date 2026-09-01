@@ -9,6 +9,8 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("./models/User");
+const StudentProfile = require("./models/StudentProfile");
+
 const authMiddleware = require("./middleware/authMiddleware");
 const roleMiddleware = require("./middleware/roleMiddleware");
 require("dotenv").config();
@@ -167,6 +169,64 @@ app.get("/api/protected", authMiddleware, (req, res) => {
     user: req.user
   });
 });
+
+// Create Student Profile
+app.post(
+  "/api/student/profile",
+  authMiddleware,
+  roleMiddleware("student"),
+  async (req, res) => {
+    try {
+      const {
+        rollNumber,
+        branch,
+        section,
+        phone,
+        cgpa,
+        graduationYear,
+        skills,
+        resume
+      } = req.body;
+
+      // Check if profile already exists
+      const existingProfile = await StudentProfile.findOne({
+        userId: req.user.id
+      });
+
+      if (existingProfile) {
+        return res.status(400).json({
+          success: false,
+          message: "Student profile already exists"
+        });
+      }
+
+      // Create profile
+      const profile = await StudentProfile.create({
+        userId: req.user.id,
+        rollNumber,
+        branch,
+        section,
+        phone,
+        cgpa,
+        graduationYear,
+        skills,
+        resume
+      });
+
+      res.status(201).json({
+        success: true,
+        message: "Student profile created successfully",
+        profile
+      });
+
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+);
 
 // Student-only route
 app.get(
