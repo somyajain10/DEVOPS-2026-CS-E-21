@@ -15,15 +15,21 @@ const authMiddleware = require("./middleware/authMiddleware");
 const roleMiddleware = require("./middleware/roleMiddleware");
 require("dotenv").config();
 
+const connectDB = require("./config/database");
+const feedbackRoutes = require("./routes/feedbackRoutes");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 console.log("JWT_SECRET loaded in server:", !!JWT_SECRET);
 
 const app = express();
 
+// Connect to MongoDB
+// connectDB();
+
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/api/feedback", feedbackRoutes);
 
 // MongoDB connection
 mongoose
