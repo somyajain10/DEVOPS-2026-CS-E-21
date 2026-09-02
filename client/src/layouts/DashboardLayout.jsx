@@ -1,55 +1,132 @@
-import { Link, Outlet } from "react-router-dom";
+import {
+  Link,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 function DashboardLayout() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      
-      {/* Sidebar */}
-      <aside
-        style={{
-          width: "220px",
-          background: "#1e3a5f",
-          color: "white",
-          padding: "20px",
-        }}
-      >
-        <h2>Placement Portal</h2>
+    <div>
+      {/* Header */}
+      <div className="dashboard-header">
+        <h1>Welcome back, Student 👋</h1>
+        <p>
+          Track your placement progress and stay updated with new opportunities.
+        </p>
+      </div>
 
-        <hr />
+      {/* Statistics */}
+      <div className="stats-grid">
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-          <Link style={{ color: "white" }} to="/student">
-            Dashboard
+        <div className="stat-card">
+          <h3>Applications</h3>
+          <h2>0</h2>
+        </div>
+
+        <div className="stat-card">
+          <h3>Eligible Companies</h3>
+          <h2>0</h2>
+        </div>
+
+        <div className="stat-card">
+          <h3>Profile Status</h3>
+          <h2>Incomplete</h2>
+        </div>
+
+        <div className="stat-card">
+          <h3>Contest Score</h3>
+          <h2>--</h2>
+        </div>
+
+      </div>
+
+      {/* Placement Status */}
+      <div className="content-card">
+        <h2>Placement Journey</h2>
+
+        <p>
+          Complete your profile and upload your resume to unlock placement
+          opportunities and eligibility checks.
+        </p>
+
+        <Link
+          className="primary-button"
+          to="/student/profile"
+        >
+          Complete Profile
+        </Link>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="content-card">
+        <h2>Quick Actions</h2>
+
+        <div className="quick-actions">
+
+          {/* Upload Resume */}
+          <Link
+            className="primary-button"
+            to="/student/resume"
+          >
+            Upload Resume
           </Link>
 
-          <Link style={{ color: "white" }} to="/student/profile">
-            Profile
+          {/* Logout */}
+          <button
+            className="logout-button"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
+
+          {/* Check Eligibility */}
+          <Link
+            className="primary-button"
+            to="/student/eligibility"
+          >
+            Check Eligibility
           </Link>
 
-          <Link style={{ color: "white" }} to="/student/resume">
-            Resume
+          {/* Join Contest Round */}
+          <Link
+            className="primary-button"
+            to="/student/contest"
+          >
+            Join Contest Round
           </Link>
 
-          <Link style={{ color: "white" }} to="/student/eligibility">
-            Eligibility
-          </Link>
+        </div>
+      </div>
 
-          <Link style={{ color: "white" }} to="/student/contest">
-            Contest Round
-          </Link>
-        </nav>
-      </aside>
+      {/* Upcoming Activity */}
+      <div className="content-card">
+        <h2>Upcoming Activity</h2>
 
-      {/* Main Content */}
-      <main
-        style={{
-          flex: 1,
-          padding: "40px",
-          background: "#f4f6f8",
-        }}
-      >
-        <Outlet />
-      </main>
+        <div className="activity-item">
+          <div>
+            <h3>No upcoming placement drives</h3>
+
+            <p>
+              New company opportunities will appear here when they are added.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* IMPORTANT:
+          This displays StudentProfile, ResumeUpload,
+          Eligibility, ContestRound, etc. inside the layout.
+      */}
+      <Outlet />
+
     </div>
   );
 }

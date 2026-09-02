@@ -10,6 +10,7 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import StudentProfile from "./pages/StudentProfile";
+import "./dashboard.css";
 
 import DashboardLayout from "./layouts/DashboardLayout";
 
