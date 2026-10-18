@@ -1,55 +1,97 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 function DashboardLayout() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/login");
+  };
+
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      
+    <div className="dashboard-layout">
+
       {/* Sidebar */}
-      <aside
-        style={{
-          width: "220px",
-          background: "#1e3a5f",
-          color: "white",
-          padding: "20px",
-        }}
-      >
-        <h2>Placement Portal</h2>
+      <aside className="dashboard-sidebar">
 
-        <hr />
+        <div className="sidebar-brand">
+          <h1>Placement Portal</h1>
+          <p>Student</p>
+        </div>
 
-        <nav style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
-          <Link style={{ color: "white" }} to="/student">
+        <nav className="sidebar-nav">
+
+          <Link
+            to="/student"
+            className={`sidebar-link ${
+              isActive("/student") ? "active" : ""
+            }`}
+          >
+            <span>📊</span>
             Dashboard
           </Link>
 
-          <Link style={{ color: "white" }} to="/student/profile">
-            Profile
+          <Link
+            to="/student/profile"
+            className={`sidebar-link ${
+              isActive("/student/profile") ? "active" : ""
+            }`}
+          >
+            <span>👤</span>
+            My Profile
           </Link>
 
-          <Link style={{ color: "white" }} to="/student/resume">
+          <Link
+            to="/student/resume"
+            className={`sidebar-link ${
+              isActive("/student/resume") ? "active" : ""
+            }`}
+          >
+            <span>📄</span>
             Resume
           </Link>
 
-          <Link style={{ color: "white" }} to="/student/eligibility">
+          <Link
+            to="/student/eligibility"
+            className={`sidebar-link ${
+              isActive("/student/eligibility") ? "active" : ""
+            }`}
+          >
+            <span>✓</span>
             Eligibility
           </Link>
 
-          <Link style={{ color: "white" }} to="/student/contest">
-            Contest Round
+          <Link
+            to="/student/contest"
+            className={`sidebar-link ${
+              isActive("/student/contest") ? "active" : ""
+            }`}
+          >
+            <span>🏆</span>
+            Contest
           </Link>
+
         </nav>
+
+        <button
+          className="sidebar-logout"
+          onClick={handleLogout}
+        >
+          <span>↪</span>
+          Logout
+        </button>
+
       </aside>
 
       {/* Main Content */}
-      <main
-        style={{
-          flex: 1,
-          padding: "40px",
-          background: "#f4f6f8",
-        }}
-      >
+      <main className="dashboard-main">
         <Outlet />
       </main>
+
     </div>
   );
 }

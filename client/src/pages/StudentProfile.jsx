@@ -11,6 +11,8 @@ function StudentProfile() {
     backlogs: "",
   });
 
+  const [message, setMessage] = useState("");
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -21,129 +23,134 @@ function StudentProfile() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Temporary: we will connect this to MongoDB later
     console.log("Student Profile:", formData);
-
-    alert("Profile saved successfully!");
+    setMessage("Profile saved successfully!");
   };
 
   return (
     <div>
-      <h1>Student Profile</h1>
-      <p>Complete your profile to check placement eligibility.</p>
+      <div className="dashboard-header">
+        <h1>My Profile</h1>
+        <p>
+          Keep your academic and personal information up to date.
+        </p>
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Full Name</label>
-          <br />
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
+      <div className="content-card profile-card">
+        <h2>Personal & Academic Information</h2>
+        <p className="section-description">
+          This information will be used to determine your eligibility for
+          placement opportunities.
+        </p>
 
-        <br />
+        <form className="profile-form" onSubmit={handleSubmit}>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Full Name</label>
+              <input
+                type="text"
+                name="name"
+                placeholder="Enter your full name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div>
-          <label>Email</label>
-          <br />
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <div className="form-group">
+              <label>Email Address</label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <br />
+            <div className="form-group">
+              <label>Phone Number</label>
+              <input
+                type="tel"
+                name="phone"
+                placeholder="Enter your phone number"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div>
-          <label>Phone Number</label>
-          <br />
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <div className="form-group">
+              <label>Branch</label>
+              <select
+                name="branch"
+                value={formData.branch}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Select Branch</option>
+                <option value="CSE">CSE</option>
+                <option value="IT">IT</option>
+                <option value="ECE">ECE</option>
+                <option value="EEE">EEE</option>
+                <option value="ME">Mechanical</option>
+                <option value="CE">Civil</option>
+              </select>
+            </div>
 
-        <br />
+            <div className="form-group">
+              <label>CGPA</label>
+              <input
+                type="number"
+                name="cgpa"
+                min="0"
+                max="10"
+                step="0.01"
+                placeholder="Example: 8.5"
+                value={formData.cgpa}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <div>
-          <label>Branch</label>
-          <br />
-          <select
-            name="branch"
-            value={formData.branch}
-            onChange={handleChange}
-            required
-          >
-            <option value="">Select Branch</option>
-            <option value="CSE">CSE</option>
-            <option value="IT">IT</option>
-            <option value="ECE">ECE</option>
-            <option value="EEE">EEE</option>
-            <option value="ME">Mechanical</option>
-            <option value="CE">Civil</option>
-          </select>
-        </div>
+            <div className="form-group">
+              <label>Graduation Year</label>
+              <input
+                type="number"
+                name="graduationYear"
+                placeholder="Example: 2027"
+                value={formData.graduationYear}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-        <br />
+            <div className="form-group">
+              <label>Number of Backlogs</label>
+              <input
+                type="number"
+                name="backlogs"
+                min="0"
+                placeholder="Enter number of backlogs"
+                value={formData.backlogs}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
 
-        <div>
-          <label>CGPA</label>
-          <br />
-          <input
-            type="number"
-            name="cgpa"
-            min="0"
-            max="10"
-            step="0.01"
-            value={formData.cgpa}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <button type="submit" className="primary-button">
+            Save Profile
+          </button>
 
-        <br />
-
-        <div>
-          <label>Graduation Year</label>
-          <br />
-          <input
-            type="number"
-            name="graduationYear"
-            value={formData.graduationYear}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <br />
-
-        <div>
-          <label>Number of Backlogs</label>
-          <br />
-          <input
-            type="number"
-            name="backlogs"
-            min="0"
-            value={formData.backlogs}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        <br />
-
-        <button type="submit">Save Profile</button>
-      </form>
+          {message && (
+            <p className="success-message">
+              ✓ {message}
+            </p>
+          )}
+        </form>
+      </div>
     </div>
   );
 }
