@@ -263,19 +263,68 @@ app.get(
 );
 
 // Admin-only route
+// Get all students - Admin only
 app.get(
-  "/api/admin",
+  "/api/admin/students",
   authMiddleware,
   roleMiddleware("admin"),
-  (req, res) => {
-    res.json({
-      success: true,
-      message: "Welcome to Admin Dashboard",
-      user: req.user
-    });
+  async (req, res) => {
+    try {
+      const students = await User.find(
+        { role: "student" },
+        "-password"
+      ).sort({ createdAt: -1 });
+
+      res.json({
+        success: true,
+        students
+      });
+
+    } catch (error) {
+      console.error("Error fetching students:", error);
+
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
   }
 );
 
+// Admin MongoDB test route
+app.get(
+  "/api/admin/test",
+  authMiddleware,
+  roleMiddleware("admin"),
+  async (req, res) => {
+    try {
+      // Check MongoDB connection
+      const mongoState = mongoose.connection.readyState;
+
+      if (mongoState !== 1) {
+        return res.status(503).json({
+          success: false,
+          message: "MongoDB is not connected"
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Admin is connected to MongoDB successfully",
+        database: mongoose.connection.name,
+        user: req.user
+      });
+
+    } catch (error) {
+      console.error("Admin MongoDB test failed:", error);
+
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+);
 // Port
 const PORT = process.env.PORT || 5000;
 

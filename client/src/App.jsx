@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import AdminCompanies from "./pages/AdminCompanies";
+import AdminDrives from "./pages/AdminDrives";
+import AdminApplications from "./pages/AdminApplications";
+import AdminContests from "./pages/AdminContests";
+import AdminStudents from "./pages/AdminStudents";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
@@ -34,6 +38,12 @@ function App() {
         {/* Other Dashboards */}
         <Route path="/company" element={<CompanyDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
+
+        <Route path="/admin/students" element={<AdminStudents />} />
+        <Route path="/admin/companies" element={<AdminCompanies />} />
+        <Route path="/admin/drives" element={<AdminDrives />} />
+        <Route path="/admin/applications" element={<AdminApplications />} />
+        <Route path="/admin/contests" element={<AdminContests />} />
 
         {/* Invalid Route */}
         <Route path="*" element={<NotFound />} />

@@ -1,131 +1,96 @@
-import {
-  Link,
-  Outlet,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 function DashboardLayout() {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     navigate("/login");
   };
 
+  const isActive = (path) => {
+    return location.pathname === path;
+  };
+
   return (
-    <div>
-      {/* Header */}
-      <div className="dashboard-header">
-        <h1>Welcome back, Student 👋</h1>
-        <p>
-          Track your placement progress and stay updated with new opportunities.
-        </p>
-      </div>
+    <div className="dashboard-layout">
 
-      {/* Statistics */}
-      <div className="stats-grid">
+      {/* Sidebar */}
+      <aside className="dashboard-sidebar">
 
-        <div className="stat-card">
-          <h3>Applications</h3>
-          <h2>0</h2>
+        <div className="sidebar-brand">
+          <h1>Placement Portal</h1>
+          <p>Student</p>
         </div>
 
-        <div className="stat-card">
-          <h3>Eligible Companies</h3>
-          <h2>0</h2>
-        </div>
+        <nav className="sidebar-nav">
 
-        <div className="stat-card">
-          <h3>Profile Status</h3>
-          <h2>Incomplete</h2>
-        </div>
-
-        <div className="stat-card">
-          <h3>Contest Score</h3>
-          <h2>--</h2>
-        </div>
-
-      </div>
-
-      {/* Placement Status */}
-      <div className="content-card">
-        <h2>Placement Journey</h2>
-
-        <p>
-          Complete your profile and upload your resume to unlock placement
-          opportunities and eligibility checks.
-        </p>
-
-        <Link
-          className="primary-button"
-          to="/student/profile"
-        >
-          Complete Profile
-        </Link>
-      </div>
-
-      {/* Quick Actions */}
-      <div className="content-card">
-        <h2>Quick Actions</h2>
-
-        <div className="quick-actions">
-
-          {/* Upload Resume */}
           <Link
-            className="primary-button"
+            to="/student"
+            className={`sidebar-link ${
+              isActive("/student") ? "active" : ""
+            }`}
+          >
+            <span>📊</span>
+            Dashboard
+          </Link>
+
+          <Link
+            to="/student/profile"
+            className={`sidebar-link ${
+              isActive("/student/profile") ? "active" : ""
+            }`}
+          >
+            <span>👤</span>
+            My Profile
+          </Link>
+
+          <Link
             to="/student/resume"
+            className={`sidebar-link ${
+              isActive("/student/resume") ? "active" : ""
+            }`}
           >
-            Upload Resume
+            <span>📄</span>
+            Resume
           </Link>
 
-          {/* Logout */}
-          <button
-            className="logout-button"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
-
-          {/* Check Eligibility */}
           <Link
-            className="primary-button"
             to="/student/eligibility"
+            className={`sidebar-link ${
+              isActive("/student/eligibility") ? "active" : ""
+            }`}
           >
-            Check Eligibility
+            <span>✓</span>
+            Eligibility
           </Link>
 
-          {/* Join Contest Round */}
           <Link
-            className="primary-button"
             to="/student/contest"
+            className={`sidebar-link ${
+              isActive("/student/contest") ? "active" : ""
+            }`}
           >
-            Join Contest Round
+            <span>🏆</span>
+            Contest
           </Link>
 
-        </div>
-      </div>
+        </nav>
 
-      {/* Upcoming Activity */}
-      <div className="content-card">
-        <h2>Upcoming Activity</h2>
+        <button
+          className="sidebar-logout"
+          onClick={handleLogout}
+        >
+          <span>↪</span>
+          Logout
+        </button>
 
-        <div className="activity-item">
-          <div>
-            <h3>No upcoming placement drives</h3>
+      </aside>
 
-            <p>
-              New company opportunities will appear here when they are added.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* IMPORTANT:
-          This displays StudentProfile, ResumeUpload,
-          Eligibility, ContestRound, etc. inside the layout.
-      */}
-      <Outlet />
+      {/* Main Content */}
+      <main className="dashboard-main">
+        <Outlet />
+      </main>
 
     </div>
   );
