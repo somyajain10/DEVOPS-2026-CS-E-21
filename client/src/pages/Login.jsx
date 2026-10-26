@@ -5,16 +5,57 @@ function Login() {
   const navigate = useNavigate();
 
   const [role, setRole] = useState("student");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (role === "student") {
-      navigate("/student");
-    } else if (role === "company") {
-      navigate("/company");
-    } else if (role === "admin") {
-      navigate("/admin");
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:5000/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        setError(data.message || "Login failed");
+        return;
+      }
+
+      // Store JWT token
+      localStorage.setItem("token", data.token);
+
+      // Store logged-in user information
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      // Use the role returned by the backend
+      if (data.user.role === "student") {
+        navigate("/student");
+      } else if (data.user.role === "company") {
+        navigate("/company");
+      } else if (data.user.role === "admin") {
+        navigate("/admin");
+      } else {
+        setError("Invalid user role");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Unable to connect to backend");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,19 +81,39 @@ function Login() {
 
         <label>Email</label>
         <br />
-        <input type="email" required />
+
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
 
         <br />
         <br />
 
         <label>Password</label>
         <br />
-        <input type="password" required />
+
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
 
         <br />
         <br />
 
-        <button type="submit">Login</button>
+        {error && (
+          <p style={{ color: "red" }}>
+            {error}
+          </p>
+        )}
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
+        </button>
       </form>
     </div>
   );

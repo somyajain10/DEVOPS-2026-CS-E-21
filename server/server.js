@@ -325,6 +325,36 @@ app.get(
     }
   }
 );
+
+// Admin dashboard statistics
+app.get(
+  "/api/admin/stats",
+  authMiddleware,
+  roleMiddleware("admin"),
+  async (req, res) => {
+    try {
+      const totalStudents = await User.countDocuments({
+        role: "student"
+      });
+      const profilesCompleted = await StudentProfile.countDocuments();
+
+      res.json({
+        success: true,
+        stats: {
+          totalStudents,
+          profilesCompleted
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching admin statistics:", error);
+
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  }
+);
 // Port
 const PORT = process.env.PORT || 5000;
 
