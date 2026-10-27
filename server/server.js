@@ -9,6 +9,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const prometheus = require("@prometheus-io/client");
 
 const User = require("./models/User");
 const StudentProfile = require("./models/StudentProfile");
@@ -23,6 +24,19 @@ const feedbackRoutes = require("./routes/feedbackRoutes");
 const companyRoutes = require("./routes/companyRoutes");
 
 const app = express();
+prometheus.collectDefaultMetrics();
+
+const httpRequests = new prometheus.Counter({
+  name: "http_requests_total",
+  help: "Total HTTP requests",
+  labelNames: ["method", "route", "status_code"]
+});
+const httpRequestDuration = new prometheus.Histogram({
+  name: "http_request_duration_seconds",
+  help: "HTTP request duration in seconds",
+  labelNames: ["method", "route"],
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5]
+});
 
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -32,6 +46,28 @@ console.log("JWT_SECRET loaded:", Boolean(JWT_SECRET));
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  if (req.path === "/metrics") return next();
+
+  const startedAt = process.hrtime.bigint();
+  res.on("finish", () => {
+    const route = req.route
+      ? `${req.baseUrl}${req.route.path}`
+      : "unmatched";
+    const labels = { method: req.method, route };
+    httpRequests.inc({ ...labels, status_code: String(res.statusCode) });
+    httpRequestDuration.observe(
+      labels,
+      Number(process.hrtime.bigint() - startedAt) / 1e9
+    );
+  });
+  next();
+});
+
+app.get("/metrics", async (_req, res) => {
+  res.setHeader("Content-Type", prometheus.register.contentType);
+  res.end(await prometheus.register.metrics());
+});
 
 // Existing routes
 app.use("/api/feedback", feedbackRoutes);
