@@ -37,6 +37,12 @@ const studentProfileSchema = new mongoose.Schema(
       max: 10
     },
 
+    backlogs: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+
     graduationYear: {
       type: Number,
       required: true

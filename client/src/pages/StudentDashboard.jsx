@@ -1,8 +1,25 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { apiRequest } from "../services/api";
+
 function StudentDashboard() {
+  const [summary, setSummary] = useState({ loading: true, profile: null, name: "Student" });
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    apiRequest("/api/student/profile")
+      .then(({ profile, user }) => setSummary({ loading: false, profile, name: user?.name || "Student" }))
+      .catch((err) => {
+        setError(err.message);
+        setSummary((current) => ({ ...current, loading: false }));
+      });
+  }, []);
+
   return (
     <div>
-      <h1>Welcome back, Student! 👋</h1>
+      <h1>Welcome back, {summary.name}! 👋</h1>
       <p>Here's an overview of your placement journey.</p>
+      {error && <p className="error-message" role="alert">{error}</p>}
 
       <div
         style={{
@@ -22,7 +39,7 @@ function StudentDashboard() {
           }}
         >
           <h3>Applications</h3>
-          <h2>0</h2>
+          <h2>—</h2>
         </div>
 
         <div
@@ -35,7 +52,7 @@ function StudentDashboard() {
           }}
         >
           <h3>Eligible Companies</h3>
-          <h2>0</h2>
+          <h2>—</h2>
         </div>
 
         <div
@@ -48,7 +65,7 @@ function StudentDashboard() {
           }}
         >
           <h3>Profile Status</h3>
-          <h2>Incomplete</h2>
+          <h2>{summary.loading ? "Loading…" : summary.profile ? "Complete" : "Incomplete"}</h2>
         </div>
 
         <div
@@ -61,7 +78,7 @@ function StudentDashboard() {
           }}
         >
           <h3>Contest Score</h3>
-          <h2>--</h2>
+          <h2>—</h2>
         </div>
       </div>
 
@@ -77,20 +94,20 @@ function StudentDashboard() {
         <h2>Placement Status</h2>
 
         <p>
-          Complete your profile and upload your resume to start applying for
-          placement opportunities.
+          {summary.profile
+            ? "Your academic profile is saved. Keep your resume up to date to prepare for placement opportunities."
+            : "Complete your profile and upload your resume to prepare for placement opportunities."}
         </p>
 
-        <button
+        <Link to="/student/profile" className="primary-button"
           style={{
             padding: "10px 20px",
             border: "none",
             borderRadius: "5px",
-            cursor: "pointer",
           }}
         >
-          Complete Profile
-        </button>
+          {summary.profile ? "View Profile" : "Complete Profile"}
+        </Link>
       </div>
     </div>
   );

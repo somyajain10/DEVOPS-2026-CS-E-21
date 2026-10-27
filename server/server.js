@@ -195,6 +195,28 @@ app.get("/api/protected", authMiddleware, (req, res) => {
 });
 
 // Create student profile
+app.get(
+  "/api/student/profile",
+  authMiddleware,
+  roleMiddleware("student"),
+  async (req, res) => {
+    try {
+      const [profile, user] = await Promise.all([
+        StudentProfile.findOne({ userId: req.user.id }),
+        User.findById(req.user.id).select("name email")
+      ]);
+
+      return res.json({ success: true, profile, user });
+    } catch (error) {
+      console.error("Student profile fetch error:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to load student profile"
+      });
+    }
+  }
+);
+
 app.post(
   "/api/student/profile",
   authMiddleware,
@@ -207,6 +229,7 @@ app.post(
         section,
         phone,
         cgpa,
+        backlogs,
         graduationYear,
         skills,
         resume
@@ -230,6 +253,7 @@ app.post(
         section,
         phone,
         cgpa,
+        backlogs,
         graduationYear,
         skills,
         resume
@@ -243,9 +267,72 @@ app.post(
     } catch (error) {
       console.error("Student profile error:", error.message);
 
-      return res.status(500).json({
+      return res.status(error.name === "ValidationError" ? 400 : 500).json({
         success: false,
-        message: error.message
+        message: error.name === "ValidationError"
+          ? "Please provide valid profile details"
+          : "Unable to create student profile"
+      });
+    }
+  }
+);
+
+// Update the logged-in student's profile
+app.put(
+  "/api/student/profile",
+  authMiddleware,
+  roleMiddleware("student"),
+  async (req, res) => {
+    try {
+      const {
+        rollNumber,
+        branch,
+        section,
+        phone,
+        cgpa,
+        graduationYear,
+        backlogs,
+        skills,
+        resume
+      } = req.body;
+
+      const profile = await StudentProfile.findOneAndUpdate(
+        { userId: req.user.id },
+        {
+          $set: {
+            rollNumber,
+            branch,
+            section,
+            phone,
+            cgpa,
+            graduationYear,
+            backlogs,
+            skills,
+            resume
+          }
+        },
+        { new: true, runValidators: true }
+      );
+
+      if (!profile) {
+        return res.status(404).json({
+          success: false,
+          message: "Create your profile before updating it"
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: "Student profile updated successfully",
+        profile
+      });
+    } catch (error) {
+      console.error("Student profile update error:", error.message);
+      return res.status(error.name === "ValidationError" ? 400 : 500).json({
+        success: false,
+        message: error.name === "ValidationError"
+          ? "Please provide valid profile details"
+          : "Unable to update student profile"
       });
     }
   }
@@ -367,7 +454,7 @@ app.get(
   }
 );
 // Port
-const PORT = process.env.PORT || 5000;
+// const PORT = process.env.PORT || 5000;
 
 // Start server after MongoDB connects
 async function startServer() {
