@@ -7,6 +7,7 @@ import AdminStudents from "./pages/AdminStudents";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import StudentDashboard from "./pages/StudentDashboard";
+import StudentApplications from "./pages/StudentApplications";
 import ResumeUpload from "./pages/ResumeUpload";
 import Eligibility from "./pages/Eligibility";
 import ContestRound from "./pages/ContestRound";
@@ -30,6 +31,7 @@ function App() {
         {/* Student Dashboard with Sidebar */}
         <Route path="/student" element={<DashboardLayout />}>
           <Route index element={<StudentDashboard />} />
+          <Route path="applications" element={<StudentApplications />} />
           <Route path="profile" element={<StudentProfile />} />
           <Route path="resume" element={<ResumeUpload />} />
           <Route path="eligibility" element={<Eligibility />} />

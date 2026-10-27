@@ -12,6 +12,9 @@ const jwt = require("jsonwebtoken");
 
 const User = require("./models/User");
 const StudentProfile = require("./models/StudentProfile");
+const Application = require("./models/Application");
+const Job = require("./models/job");
+require("./models/company");
 
 const authMiddleware = require("./middleware/authMiddleware");
 const roleMiddleware = require("./middleware/roleMiddleware");
@@ -339,6 +342,129 @@ app.put(
 );
 
 // Student-only route
+app.get(
+  "/api/student/opportunities",
+  authMiddleware,
+  roleMiddleware("student"),
+  async (req, res) => {
+    try {
+      const opportunities = await Job.find({
+        status: "open",
+        applicationDeadline: { $gte: new Date() }
+      })
+        .populate("company", "companyName")
+        .sort({ applicationDeadline: 1 });
+
+      return res.json({ success: true, opportunities });
+    } catch (error) {
+      console.error("Student opportunities error:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to load placement opportunities"
+      });
+    }
+  }
+);
+
+app.get(
+  "/api/student/applications",
+  authMiddleware,
+  roleMiddleware("student"),
+  async (req, res) => {
+    try {
+      const profile = await StudentProfile.findOne({ userId: req.user.id });
+      if (!profile) {
+        return res.json({ success: true, applications: [] });
+      }
+
+      const applications = await Application.find({ student: profile._id })
+        .populate({
+          path: "job",
+          populate: { path: "company", select: "companyName" }
+        })
+        .sort({ appliedAt: -1 });
+
+      return res.json({ success: true, applications });
+    } catch (error) {
+      console.error("Student applications error:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to load your applications"
+      });
+    }
+  }
+);
+
+app.post(
+  "/api/student/applications",
+  authMiddleware,
+  roleMiddleware("student"),
+  async (req, res) => {
+    try {
+      const { jobId } = req.body;
+      if (!mongoose.isValidObjectId(jobId)) {
+        return res.status(400).json({
+          success: false,
+          message: "A valid placement opportunity is required"
+        });
+      }
+
+      const profile = await StudentProfile.findOne({ userId: req.user.id });
+      if (!profile) {
+        return res.status(409).json({
+          success: false,
+          message: "Complete your student profile before applying"
+        });
+      }
+
+      const job = await Job.findOne({
+        _id: jobId,
+        status: "open",
+        applicationDeadline: { $gte: new Date() }
+      });
+      if (!job) {
+        return res.status(404).json({
+          success: false,
+          message: "This placement opportunity is unavailable or closed"
+        });
+      }
+
+      const existingApplication = await Application.findOne({
+        student: profile._id,
+        job: job._id
+      });
+      if (existingApplication) {
+        return res.status(409).json({
+          success: false,
+          message: "You have already applied to this opportunity"
+        });
+      }
+
+      const application = await Application.create({
+        student: profile._id,
+        job: job._id
+      });
+      return res.status(201).json({
+        success: true,
+        message: "Application submitted successfully",
+        application
+      });
+    } catch (error) {
+      if (error.code === 11000) {
+        return res.status(409).json({
+          success: false,
+          message: "You have already applied to this opportunity"
+        });
+      }
+      console.error("Student application error:", error.message);
+      return res.status(500).json({
+        success: false,
+        message: "Unable to submit your application"
+      });
+    }
+  }
+);
+
 app.get(
   "/api/student",
   authMiddleware,

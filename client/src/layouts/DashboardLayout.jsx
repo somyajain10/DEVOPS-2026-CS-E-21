@@ -18,6 +18,7 @@ function DashboardLayout() {
   const studentLinks = [
     { path: "/student", icon: "📊", label: "Dashboard" },
     { path: "/student/profile", icon: "👤", label: "My Profile" },
+    { path: "/student/applications", icon: "📑", label: "Applications" },
     { path: "/student/resume", icon: "📄", label: "Resume" },
     { path: "/student/eligibility", icon: "✓", label: "Eligibility" },
     { path: "/student/contest", icon: "🏆", label: "Contest" },
