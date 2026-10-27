@@ -1,55 +1,80 @@
+
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-
+require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 const User = require("./models/User");
 const StudentProfile = require("./models/StudentProfile");
 
 const authMiddleware = require("./middleware/authMiddleware");
 const roleMiddleware = require("./middleware/roleMiddleware");
-require("dotenv").config();
 
-const connectDB = require("./config/database");
 const feedbackRoutes = require("./routes/feedbackRoutes");
-const JWT_SECRET = process.env.JWT_SECRET;
-
-console.log("JWT_SECRET loaded in server:", !!JWT_SECRET);
+const companyRoutes = require("./routes/companyRoutes");
 
 const app = express();
 
-// Connect to MongoDB
-// connectDB();
+const PORT = process.env.PORT || 5000;
+const JWT_SECRET = process.env.JWT_SECRET;
+
+console.log("JWT_SECRET loaded:", Boolean(JWT_SECRET));
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Existing routes
 app.use("/api/feedback", feedbackRoutes);
 
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-     console.log("Database name:", mongoose.connection.name);
-  })
-  .catch((error) => {
-    console.error("MongoDB connection failed:", error.message);
+// IMPORTANT: Company profile routes
+app.use("/api/company/profile", companyRoutes);
+
+// Root route
+app.get("/", (req, res) => {
+  res.json({
+    success: true,
+    message: "College Placement Portal API is running"
   });
+});
 
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Backend is healthy",
+    databaseConnected: mongoose.connection.readyState === 1
+  });
+});
 
-// Register User
+// Register user
 app.post("/api/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, password and role are required"
+      });
+    }
+
+    if (!["student", "company"].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid registration role"
+      });
+    }
+
+    const existingUser = await User.findOne({
+      email: email.trim().toLowerCase()
+    });
 
     if (existingUser) {
       return res.status(400).json({
@@ -58,44 +83,57 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    // Hash password before saving
-const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-
-    // Create new user
     const user = await User.create({
-      name,
-      email,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
       password: hashedPassword,
       role
     });
 
-    res.status(201).json({
-  success: true,
-  message: "User registered successfully",
-  user: {
-    id: user._id,
-    name: user.name,
-    email: user.email,
-    role: user.role
-  }
-});
-
+    return res.status(201).json({
+      success: true,
+      message: "User registered successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
   } catch (error) {
-    res.status(500).json({
+    console.error("Registration error:", error.message);
+
+    return res.status(500).json({
       success: false,
       message: error.message
     });
   }
 });
 
-// Login User
+// Login user
 app.post("/api/login", async (req, res) => {
   try {
+    if (!JWT_SECRET) {
+      return res.status(500).json({
+        success: false,
+        message: "JWT_SECRET is missing in server .env"
+      });
+    }
+
     const { email, password } = req.body;
 
-    // Check if user exists
-    const user = await User.findOne({ email });
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Email and password are required"
+      });
+    }
+
+    const user = await User.findOne({
+      email: email.trim().toLowerCase()
+    });
 
     if (!user) {
       return res.status(400).json({
@@ -104,7 +142,6 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    // Compare entered password with hashed password
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user.password
@@ -117,22 +154,17 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    // Create JWT token
-    console.log("JWT_SECRET available during login:", !!process.env.JWT_SECRET);
-
     const token = jwt.sign(
       {
-        id: user._id,
+        id: user._id.toString(),
         email: user.email,
         role: user.role
       },
       JWT_SECRET,
-      {
-        expiresIn: "1d"
-      }
+      { expiresIn: "1d" }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Login successful",
       token,
@@ -143,28 +175,14 @@ app.post("/api/login", async (req, res) => {
         role: user.role
       }
     });
-
   } catch (error) {
-    res.status(500).json({
+    console.error("Login error:", error.message);
+
+    return res.status(500).json({
       success: false,
       message: error.message
     });
   }
-});
-
-// Test route
-app.get("/", (req, res) => {
-  res.json({
-    message: "College Placement Portal API is running",
-  });
-});
-
-// Health check
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "Backend is healthy",
-  });
 });
 
 // Protected test route
@@ -176,7 +194,7 @@ app.get("/api/protected", authMiddleware, (req, res) => {
   });
 });
 
-// Create Student Profile
+// Create student profile
 app.post(
   "/api/student/profile",
   authMiddleware,
@@ -194,7 +212,6 @@ app.post(
         resume
       } = req.body;
 
-      // Check if profile already exists
       const existingProfile = await StudentProfile.findOne({
         userId: req.user.id
       });
@@ -206,7 +223,6 @@ app.post(
         });
       }
 
-      // Create profile
       const profile = await StudentProfile.create({
         userId: req.user.id,
         rollNumber,
@@ -219,14 +235,15 @@ app.post(
         resume
       });
 
-      res.status(201).json({
+      return res.status(201).json({
         success: true,
         message: "Student profile created successfully",
         profile
       });
-
     } catch (error) {
-      res.status(500).json({
+      console.error("Student profile error:", error.message);
+
+      return res.status(500).json({
         success: false,
         message: error.message
       });
@@ -248,7 +265,7 @@ app.get(
   }
 );
 
-// Company-only route
+// Company dashboard route
 app.get(
   "/api/company",
   authMiddleware,
@@ -262,8 +279,7 @@ app.get(
   }
 );
 
-// Admin-only route
-// Get all students - Admin only
+// Admin: Get all students
 app.get(
   "/api/admin/students",
   authMiddleware,
@@ -275,15 +291,14 @@ app.get(
         "-password"
       ).sort({ createdAt: -1 });
 
-      res.json({
+      return res.json({
         success: true,
         students
       });
-
     } catch (error) {
-      console.error("Error fetching students:", error);
+      console.error("Admin students error:", error.message);
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: error.message
       });
@@ -291,43 +306,62 @@ app.get(
   }
 );
 
-// Admin MongoDB test route
+// Admin: MongoDB connection test
 app.get(
   "/api/admin/test",
   authMiddleware,
   roleMiddleware("admin"),
   async (req, res) => {
     try {
-      // Check MongoDB connection
-      const mongoState = mongoose.connection.readyState;
-
-      if (mongoState !== 1) {
+      if (mongoose.connection.readyState !== 1) {
         return res.status(503).json({
           success: false,
           message: "MongoDB is not connected"
         });
       }
 
-      res.json({
+      return res.json({
         success: true,
         message: "Admin is connected to MongoDB successfully",
         database: mongoose.connection.name,
         user: req.user
       });
-
     } catch (error) {
-      console.error("Admin MongoDB test failed:", error);
+      console.error("Admin test error:", error.message);
 
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: error.message
       });
     }
   }
 );
-// Port
-const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Start server after MongoDB connects
+async function startServer() {
+  if (!process.env.MONGO_URI) {
+    console.error("MONGO_URI is missing in server .env");
+    process.exit(1);
+  }
+
+  if (!JWT_SECRET) {
+    console.error("JWT_SECRET is missing in server .env");
+    process.exit(1);
+  }
+
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+
+    console.log("MongoDB connected successfully");
+    console.log("Database name:", mongoose.connection.name);
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("MongoDB connection failed:", error.message);
+    process.exit(1);
+  }
+}
+
+startServer();
