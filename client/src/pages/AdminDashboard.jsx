@@ -1,9 +1,42 @@
+import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import "../dashboard.css";
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [stats, setStats] = useState({
+  totalStudents: 0,
+  profilesCompleted: 0,
+
+});
+
+useEffect(() => {
+  fetchStats();
+}, []);
+
+const fetchStats = async () => {
+  try {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+      "http://localhost:5000/api/admin/stats",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      setStats(data.stats);
+    }
+  } catch (error) {
+    console.error("Failed to fetch admin statistics:", error);
+  }
+};
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -114,7 +147,7 @@ function AdminDashboard() {
 
             <div>
               <span>Total Students</span>
-              <strong>0</strong>
+              <strong>{stats.totalStudents}</strong>
             </div>
           </div>
 
@@ -179,12 +212,12 @@ function AdminDashboard() {
 
               <div className="overview-row">
                 <span>Students registered</span>
-                <strong>0</strong>
+                <strong>{stats.totalStudents}</strong>
               </div>
 
               <div className="overview-row">
                 <span>Profiles completed</span>
-                <strong>0</strong>
+                <strong>{stats.profilesCompleted}</strong>
               </div>
 
               <div className="overview-row">
