@@ -1,97 +1,70 @@
+
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
 function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const isCompany = location.pathname.startsWith("/company");
+  const basePath = isCompany ? "/company" : "/student";
+
   const handleLogout = () => {
+    // Keep your existing authentication cleanup here if you have it.
     navigate("/login");
   };
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
+  const isActive = (path) => location.pathname === path;
+
+  const studentLinks = [
+    { path: "/student", icon: "📊", label: "Dashboard" },
+    { path: "/student/profile", icon: "👤", label: "My Profile" },
+    { path: "/student/resume", icon: "📄", label: "Resume" },
+    { path: "/student/eligibility", icon: "✓", label: "Eligibility" },
+    { path: "/student/contest", icon: "🏆", label: "Contest" },
+  ];
+
+  const companyLinks = [
+    { path: "/company", icon: "📊", label: "Dashboard" },
+    { path: "/company/profile", icon: "🏢", label: "Company Profile" },
+    { path: "/company/drives", icon: "💼", label: "Placement Drives" },
+    { path: "/company/applications", icon: "📑", label: "Applications" },
+    { path: "/company/students", icon: "👥", label: "Eligible Students" },
+  ];
+
+  const links = isCompany ? companyLinks : studentLinks;
 
   return (
     <div className="dashboard-layout">
-
-      {/* Sidebar */}
       <aside className="dashboard-sidebar">
-
         <div className="sidebar-brand">
           <h1>Placement Portal</h1>
-          <p>Student</p>
+          <p>{isCompany ? "Company Panel" : "Student"}</p>
         </div>
 
         <nav className="sidebar-nav">
-
-          <Link
-            to="/student"
-            className={`sidebar-link ${
-              isActive("/student") ? "active" : ""
-            }`}
-          >
-            <span>📊</span>
-            Dashboard
-          </Link>
-
-          <Link
-            to="/student/profile"
-            className={`sidebar-link ${
-              isActive("/student/profile") ? "active" : ""
-            }`}
-          >
-            <span>👤</span>
-            My Profile
-          </Link>
-
-          <Link
-            to="/student/resume"
-            className={`sidebar-link ${
-              isActive("/student/resume") ? "active" : ""
-            }`}
-          >
-            <span>📄</span>
-            Resume
-          </Link>
-
-          <Link
-            to="/student/eligibility"
-            className={`sidebar-link ${
-              isActive("/student/eligibility") ? "active" : ""
-            }`}
-          >
-            <span>✓</span>
-            Eligibility
-          </Link>
-
-          <Link
-            to="/student/contest"
-            className={`sidebar-link ${
-              isActive("/student/contest") ? "active" : ""
-            }`}
-          >
-            <span>🏆</span>
-            Contest
-          </Link>
-
+          {links.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`sidebar-link ${
+                isActive(link.path) ? "active" : ""
+              }`}
+            >
+              <span>{link.icon}</span>
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        <button
-          className="sidebar-logout"
-          onClick={handleLogout}
-        >
+        <button className="sidebar-logout" onClick={handleLogout}>
           <span>↪</span>
           Logout
         </button>
-
       </aside>
 
-      {/* Main Content */}
       <main className="dashboard-main">
         <Outlet />
       </main>
-
     </div>
   );
 }

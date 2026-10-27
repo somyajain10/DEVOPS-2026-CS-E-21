@@ -14,6 +14,7 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import StudentProfile from "./pages/StudentProfile";
+import CompanyProfile from "./pages/companyprofile.jsx";
 import "./dashboard.css";
 
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -36,7 +37,10 @@ function App() {
         </Route>
 
         {/* Other Dashboards */}
-        <Route path="/company" element={<CompanyDashboard />} />
+       <Route path="/company" element={<DashboardLayout />}>
+       <Route index element={<CompanyDashboard />} />
+       <Route path="profile" element={<CompanyProfile />} />
+       </Route>
         <Route path="/admin" element={<AdminDashboard />} />
 
         <Route path="/admin/students" element={<AdminStudents />} />

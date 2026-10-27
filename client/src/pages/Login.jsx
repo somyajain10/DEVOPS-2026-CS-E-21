@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,12 +8,11 @@ function Login() {
   const [role, setRole] = useState("student");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     setError("");
     setLoading(true);
 
@@ -23,7 +23,7 @@ function Login() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email,
+          email: email.trim(),
           password,
         }),
       });
@@ -31,29 +31,38 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        setError(data.message || "Login failed");
-        return;
+        throw new Error(data.message || "Login failed");
       }
 
-      // Store JWT token
+      if (!data.token) {
+        throw new Error("Backend ne login token nahi bheja.");
+      }
+
+      // Save token and user details
       localStorage.setItem("token", data.token);
 
-      // Store logged-in user information
-      localStorage.setItem("user", JSON.stringify(data.user));
-
-      // Use the role returned by the backend
-      if (data.user.role === "student") {
-        navigate("/student");
-      } else if (data.user.role === "company") {
-        navigate("/company");
-      } else if (data.user.role === "admin") {
-        navigate("/admin");
-      } else {
-        setError("Invalid user role");
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
       }
-    } catch (error) {
-      console.error("Login error:", error);
-      setError("Unable to connect to backend");
+
+      // Verify the selected role matches the account
+      if (data.user?.role !== role) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        throw new Error(
+          `Ye account ${data.user?.role || "unknown"} role ka hai. Sahi role select karo.`
+        );
+      }
+
+      if (role === "student") {
+        navigate("/student");
+      } else if (role === "company") {
+        navigate("/company");
+      } else if (role === "admin") {
+        navigate("/admin");
+      }
+    } catch (err) {
+      setError(err.message || "Login nahi ho paya.");
     } finally {
       setLoading(false);
     }
@@ -81,7 +90,6 @@ function Login() {
 
         <label>Email</label>
         <br />
-
         <input
           type="email"
           value={email}
@@ -94,7 +102,6 @@ function Login() {
 
         <label>Password</label>
         <br />
-
         <input
           type="password"
           value={password}
@@ -105,15 +112,13 @@ function Login() {
         <br />
         <br />
 
-        {error && (
-          <p style={{ color: "red" }}>
-            {error}
-          </p>
-        )}
-
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Login"}
         </button>
+
+        {error && (
+          <p style={{ color: "red" }}>{error}</p>
+        )}
       </form>
     </div>
   );
