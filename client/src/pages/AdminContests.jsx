@@ -1,163 +1,107 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { apiRequest } from "../services/api";
+
+const emptyForm = { title: "", company: "", date: "", duration: "" };
 
 function AdminContests() {
-  const [contests, setContests] = useState([
-    {
-      id: 1,
-      title: "Coding Challenge 2026",
-      company: "TCS",
-      date: "2026-11-05",
-      duration: "90 minutes",
-      status: "Upcoming",
-    },
-    {
-      id: 2,
-      title: "Technical Assessment",
-      company: "Infosys",
-      date: "2026-11-12",
-      duration: "60 minutes",
-      status: "Upcoming",
-    },
-  ]);
-
+  const [contests, setContests] = useState([]);
   const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(emptyForm);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
-  const [form, setForm] = useState({
-    title: "",
-    company: "",
-    date: "",
-    duration: "",
-  });
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleCreateContest = (e) => {
-    e.preventDefault();
-
-    if (!form.title || !form.company || !form.date || !form.duration) {
-      alert("Please fill all fields.");
-      return;
+  const loadContests = useCallback(async () => {
+    try {
+      const result = await apiRequest("/api/contests/admin");
+      setContests(result.contests || []);
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
+  }, []);
 
-    setContests([
-      ...contests,
-      {
-        id: Date.now(),
-        ...form,
-        status: "Upcoming",
-      },
-    ]);
+  useEffect(() => {
+    loadContests();
+  }, [loadContests]);
 
-    setForm({
-      title: "",
-      company: "",
-      date: "",
-      duration: "",
-    });
-
-    setShowForm(false);
+  const handleCreateContest = async (event) => {
+    event.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      await apiRequest("/api/contests/admin", {
+        method: "POST",
+        body: JSON.stringify(form)
+      });
+      setForm(emptyForm);
+      setShowForm(false);
+      await loadContests();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleDelete = (id) => {
-    if (window.confirm("Delete this contest?")) {
-      setContests(
-        contests.filter((contest) => contest.id !== id)
-      );
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this contest?")) return;
+    setError("");
+    try {
+      await apiRequest(`/api/contests/admin/${id}`, { method: "DELETE" });
+      await loadContests();
+    } catch (err) {
+      setError(err.message);
     }
   };
 
   return (
     <div className="admin-page">
-
       <div className="admin-page-header">
         <div>
           <h1>Contests</h1>
           <p>Create and manage coding and assessment rounds.</p>
         </div>
-
-        <button
-          className="admin-primary-button"
-          onClick={() => setShowForm(!showForm)}
-        >
+        <button className="admin-primary-button" onClick={() => setShowForm(!showForm)}>
           {showForm ? "Cancel" : "+ Create Contest"}
         </button>
       </div>
 
+      {error && <p className="error-message" role="alert">{error}</p>}
+
       {showForm && (
         <div className="admin-panel">
-
           <div className="panel-header">
-            <div>
-              <h2>Create Contest</h2>
-              <p>Schedule a new contest or assessment.</p>
-            </div>
+            <div><h2>Create Contest</h2><p>Schedule a new contest or assessment.</p></div>
           </div>
-
-          <form
-            className="admin-form"
-            onSubmit={handleCreateContest}
-          >
-
+          <form className="admin-form" onSubmit={handleCreateContest}>
             <div className="form-group">
-              <label>Contest Title</label>
-              <input
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="Coding Challenge"
-              />
+              <label htmlFor="contest-title">Contest Title</label>
+              <input id="contest-title" name="title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />
             </div>
-
             <div className="form-group">
-              <label>Company</label>
-              <input
-                name="company"
-                value={form.company}
-                onChange={handleChange}
-                placeholder="Company name"
-              />
+              <label htmlFor="contest-company">Company</label>
+              <input id="contest-company" name="company" value={form.company} onChange={(e) => setForm({ ...form, company: e.target.value })} required />
             </div>
-
             <div className="form-group">
-              <label>Contest Date</label>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-              />
+              <label htmlFor="contest-date">Contest Date</label>
+              <input id="contest-date" type="date" name="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required />
             </div>
-
             <div className="form-group">
-              <label>Duration</label>
-              <input
-                name="duration"
-                value={form.duration}
-                onChange={handleChange}
-                placeholder="90 minutes"
-              />
+              <label htmlFor="contest-duration">Duration</label>
+              <input id="contest-duration" name="duration" value={form.duration} onChange={(e) => setForm({ ...form, duration: e.target.value })} placeholder="90 minutes" required />
             </div>
-
-            <button
-              type="submit"
-              className="admin-primary-button"
-            >
-              Create Contest
+            <button type="submit" className="admin-primary-button" disabled={saving}>
+              {saving ? "Creating…" : "Create Contest"}
             </button>
-
           </form>
-
         </div>
       )}
 
       <div className="admin-panel">
-
-        {contests.length === 0 ? (
+        {loading ? <p role="status">Loading contests…</p> : contests.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🏆</div>
             <h3>No contests available</h3>
@@ -165,62 +109,26 @@ function AdminContests() {
           </div>
         ) : (
           <div className="admin-table-wrapper">
-
             <table className="admin-table">
-
               <thead>
-                <tr>
-                  <th>Contest</th>
-                  <th>Company</th>
-                  <th>Date</th>
-                  <th>Duration</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
+                <tr><th>Contest</th><th>Company</th><th>Date</th><th>Duration</th><th>Status</th><th>Actions</th></tr>
               </thead>
-
               <tbody>
                 {contests.map((contest) => (
-                  <tr key={contest.id}>
-
-                    <td>
-                      <strong>{contest.title}</strong>
-                    </td>
-
+                  <tr key={contest._id}>
+                    <td><strong>{contest.title}</strong></td>
                     <td>{contest.company}</td>
-
-                    <td>{contest.date}</td>
-
+                    <td>{new Date(contest.date).toLocaleDateString()}</td>
                     <td>{contest.duration}</td>
-
-                    <td>
-                      <span className="status-badge">
-                        {contest.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <button
-                        className="table-button danger"
-                        onClick={() =>
-                          handleDelete(contest.id)
-                        }
-                      >
-                        Delete
-                      </button>
-                    </td>
-
+                    <td><span className="status-badge">{new Date(contest.date) >= new Date(new Date().setHours(0, 0, 0, 0)) ? "Upcoming" : "Completed"}</span></td>
+                    <td><button className="table-button danger" onClick={() => handleDelete(contest._id)}>Delete</button></td>
                   </tr>
                 ))}
               </tbody>
-
             </table>
-
           </div>
         )}
-
       </div>
-
     </div>
   );
 }

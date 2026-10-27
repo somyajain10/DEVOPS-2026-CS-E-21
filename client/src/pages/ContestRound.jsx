@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiRequest } from "../services/api";
 
 function ContestRound() {
   const questions = [
@@ -31,6 +32,14 @@ function ContestRound() {
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [timeLeft, setTimeLeft] = useState(60);
+  const [contests, setContests] = useState([]);
+  const [contestError, setContestError] = useState("");
+
+  useEffect(() => {
+    apiRequest("/api/contests/student")
+      .then((result) => setContests(result.contests || []))
+      .catch((error) => setContestError(error.message));
+  }, []);
 
   const answeredCount = Object.keys(answers).length;
 
@@ -87,6 +96,20 @@ function ContestRound() {
         <p>
           Test your technical knowledge and track your performance.
         </p>
+      </div>
+
+      <div className="content-card">
+        <h2>Scheduled Contests</h2>
+        {contestError && <p className="error-message" role="alert">{contestError}</p>}
+        {!contestError && contests.length === 0 ? (
+          <p>No contests are scheduled yet.</p>
+        ) : (
+          contests.map((contest) => (
+            <p key={contest._id}>
+              <strong>{contest.title}</strong> — {contest.company}, {new Date(contest.date).toLocaleDateString()} ({contest.duration})
+            </p>
+          ))
+        )}
       </div>
 
       {!submitted ? (

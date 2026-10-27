@@ -22,6 +22,7 @@ const roleMiddleware = require("./middleware/roleMiddleware");
 
 const feedbackRoutes = require("./routes/feedbackRoutes");
 const companyRoutes = require("./routes/companyRoutes");
+const contestRoutes = require("./routes/contestRoutes");
 
 const app = express();
 prometheus.collectDefaultMetrics();
@@ -74,6 +75,7 @@ app.use("/api/feedback", feedbackRoutes);
 
 // IMPORTANT: Company profile routes
 app.use("/api/company/profile", companyRoutes);
+app.use("/api/contests", contestRoutes);
 
 // Root route
 app.get("/", (req, res) => {
