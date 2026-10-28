@@ -1,7 +1,8 @@
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "../services/api";
 
-const API_URL = "https://devops-2026-cs-e-21.onrender.com/api/company/profile";
+const API_URL = apiUrl("/api/company/profile");
 
 const emptyProfile = {
   companyName: "",

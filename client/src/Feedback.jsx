@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { apiUrl } from './services/api'
 import './Feedback.css'
 
 function Feedback() {
@@ -12,7 +13,7 @@ function Feedback() {
     e.preventDefault()
 
     try {
-      const response = await fetch('https://devops-2026-cs-e-21.onrender.com/api/feedback', {
+      const response = await fetch(apiUrl('/api/feedback'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

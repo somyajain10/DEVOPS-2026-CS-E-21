@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { apiUrl } from "../services/api";
 
 function AdminStudents() {
   const [students, setStudents] = useState([]);
@@ -14,7 +15,7 @@ function AdminStudents() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "https://devops-2026-cs-e-21.onrender.com/api/admin/students",
+        apiUrl("/api/admin/students"),
         {
           headers: {
             Authorization: `Bearer ${token}`,

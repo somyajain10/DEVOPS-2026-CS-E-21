@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { apiUrl } from "../services/api";
 import "../dashboard.css";
 
 function AdminDashboard() {
@@ -20,7 +21,7 @@ const fetchStats = async () => {
     const token = localStorage.getItem("token");
 
     const response = await fetch(
-      "https://devops-2026-cs-e-21.onrender.com/api/admin/stats",
+      apiUrl("/api/admin/stats"),
       {
         headers: {
           Authorization: `Bearer ${token}`,

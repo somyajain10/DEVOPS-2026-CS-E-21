@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { apiUrl } from "../services/api";
 
 function CompanyDashboard() {
   const [profile, setProfile] = useState(null);
@@ -9,7 +10,7 @@ function CompanyDashboard() {
     async function loadCompanyProfile() {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("https://devops-2026-cs-e-21.onrender.com/api/company/profile", {
+        const response = await fetch(apiUrl("/api/company/profile"), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await response.json();
