@@ -14,7 +14,7 @@ function AdminStudents() {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        "http://localhost:5000/api/admin/students",
+        "https://devops-2026-cs-e-21.onrender.com/api/admin/students",
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 
-const API_URL = "http://localhost:5000/api/company/profile";
+const API_URL = "https://devops-2026-cs-e-21.onrender.com/api/company/profile";
 
 const emptyProfile = {
   companyName: "",

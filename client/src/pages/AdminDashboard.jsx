@@ -20,7 +20,7 @@ const fetchStats = async () => {
     const token = localStorage.getItem("token");
 
     const response = await fetch(
-      "http://localhost:5000/api/admin/stats",
+      "https://devops-2026-cs-e-21.onrender.com/api/admin/stats",
       {
         headers: {
           Authorization: `Bearer ${token}`,
