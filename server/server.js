@@ -9,7 +9,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const prometheus = require("@prometheus-io/client");
+const prometheus = require("prom-client");
 
 const User = require("./models/User");
 const StudentProfile = require("./models/StudentProfile");
