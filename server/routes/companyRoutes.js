@@ -3,7 +3,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const router = express.Router();
 
-const Company = require("../models/Company");
+const Company = require("../models/company");
 const Job = require("../models/job");
 const Application = require("../models/Application");
 const StudentProfile = require("../models/StudentProfile");
