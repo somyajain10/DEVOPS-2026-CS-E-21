@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import StudentProfile from "./pages/StudentProfile";
 import CompanyProfile from "./pages/companyprofile.jsx";
+import CompanyWorkspace from "./pages/CompanyWorkspace";
 import "./dashboard.css";
 
 import DashboardLayout from "./layouts/DashboardLayout";
@@ -38,11 +39,16 @@ function App() {
           <Route path="contest" element={<ContestRound />} />
         </Route>
 
+        {/* Company Dashboard with shared sidebar */}
+        <Route path="/company" element={<DashboardLayout />}>
+          <Route index element={<CompanyDashboard />} />
+          <Route path="profile" element={<CompanyProfile />} />
+          <Route path="drives" element={<CompanyWorkspace section="drives" />} />
+          <Route path="applications" element={<CompanyWorkspace section="applications" />} />
+          <Route path="students" element={<CompanyWorkspace section="students" />} />
+        </Route>
+
         {/* Other Dashboards */}
-       <Route path="/company" element={<DashboardLayout />}>
-       <Route index element={<CompanyDashboard />} />
-       <Route path="profile" element={<CompanyProfile />} />
-       </Route>
         <Route path="/admin" element={<AdminDashboard />} />
 
         <Route path="/admin/students" element={<AdminStudents />} />

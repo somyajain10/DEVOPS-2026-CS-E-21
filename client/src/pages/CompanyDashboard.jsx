@@ -1,5 +1,35 @@
 
+import { useEffect, useState } from "react";
+
 function CompanyDashboard() {
+  const [profile, setProfile] = useState(null);
+  const [profileMessage, setProfileMessage] = useState("");
+
+  useEffect(() => {
+    async function loadCompanyProfile() {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:5000/api/company/profile", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.message || "Unable to load company profile");
+        }
+
+        setProfile(data.profile);
+        if (!data.profile) {
+          setProfileMessage("Complete your company profile to save your details.");
+        }
+      } catch (error) {
+        setProfileMessage(error.message || "Unable to load company profile.");
+      }
+    }
+
+    loadCompanyProfile();
+  }, []);
+
   return (
     <div className="company-dashboard">
       <div className="company-page-heading">
@@ -63,10 +93,25 @@ function CompanyDashboard() {
 
       <section className="company-panel">
         <h2>Getting Started</h2>
-        <p>
-          Complete your company profile, then create a placement
-          drive to start recruiting students.
-        </p>
+        {profile ? (
+          <>
+            <p>{profile.companyName}</p>
+            <div className="company-overview-row">
+              <span>Industry</span>
+              <strong>{profile.industry}</strong>
+            </div>
+            <div className="company-overview-row">
+              <span>Location</span>
+              <strong>{profile.location}</strong>
+            </div>
+            <div className="company-overview-row">
+              <span>Contact email</span>
+              <strong>{profile.contactEmail}</strong>
+            </div>
+          </>
+        ) : (
+          <p>{profileMessage || "Complete your company profile, then create a placement drive to start recruiting students."}</p>
+        )}
       </section>
     </div>
   );

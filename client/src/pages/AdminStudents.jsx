@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 function AdminStudents() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
   useEffect(() => {
     fetchStudents();
@@ -84,7 +85,10 @@ function AdminStudents() {
                     <td>{student.role}</td>
 
                     <td>
-                      <button className="table-button">
+                      <button
+                        className="table-button"
+                        onClick={() => setSelectedStudent(student)}
+                      >
                         View
                       </button>
                     </td>
@@ -99,6 +103,29 @@ function AdminStudents() {
         )}
 
       </div>
+
+      {selectedStudent && (
+        <div className="admin-panel" aria-labelledby="student-details-title">
+          <div className="panel-header">
+            <h2 id="student-details-title">Student Details</h2>
+            <button
+              className="table-button"
+              onClick={() => setSelectedStudent(null)}
+            >
+              Close
+            </button>
+          </div>
+          <p><strong>Name:</strong> {selectedStudent.name || "—"}</p>
+          <p><strong>Email:</strong> {selectedStudent.email || "—"}</p>
+          <p><strong>Role:</strong> {selectedStudent.role || "—"}</p>
+          {selectedStudent.createdAt && (
+            <p>
+              <strong>Registered:</strong>{" "}
+              {new Date(selectedStudent.createdAt).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+      )}
 
     </div>
   );

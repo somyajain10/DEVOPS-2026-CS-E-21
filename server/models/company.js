@@ -49,4 +49,6 @@ const companySchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Company", companySchema);
+companySchema.index({ user: 1 }, { unique: true });
+
+module.exports = mongoose.models.Company || mongoose.model("Company", companySchema);

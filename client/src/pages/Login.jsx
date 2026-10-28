@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Login.css";
 
 function Login() {
   const navigate = useNavigate();
@@ -69,58 +70,62 @@ function Login() {
   };
 
   return (
-    <div>
-      <h1>Login</h1>
+    <main className="login-page">
+      <section className="login-card" aria-labelledby="login-title">
+        <header className="login-intro">
+          <div className="login-mark" aria-hidden="true">CP</div>
+          <p className="login-portal-name">College Placement Portal</p>
+          <p className="login-subtitle">Sign in to continue</p>
+        </header>
 
-      <form onSubmit={handleLogin}>
-        <label>Select Role</label>
-        <br />
+        <form className="login-form" onSubmit={handleLogin}>
+          <h1 id="login-title">Welcome back</h1>
 
-        <select
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <option value="student">Student</option>
-          <option value="company">Company</option>
-          <option value="admin">Admin</option>
-        </select>
+          <div className="login-field">
+            <label htmlFor="login-role">Select role</label>
+            <select
+              id="login-role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            >
+              <option value="student">Student</option>
+              <option value="company">Company</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
 
-        <br />
-        <br />
+          <div className="login-field">
+            <label htmlFor="login-email">Email</label>
+            <input
+              id="login-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              required
+            />
+          </div>
 
-        <label>Email</label>
-        <br />
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+          <div className="login-field">
+            <label htmlFor="login-password">Password</label>
+            <input
+              id="login-password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </div>
 
-        <br />
-        <br />
+          <button className="login-submit" type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
 
-        <label>Password</label>
-        <br />
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-
-        <br />
-        <br />
-
-        <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-
-        {error && (
-          <p style={{ color: "red" }}>{error}</p>
-        )}
-      </form>
-    </div>
+          {error && <p className="login-error" role="alert">{error}</p>}
+        </form>
+      </section>
+    </main>
   );
 }
 

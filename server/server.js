@@ -74,7 +74,7 @@ app.get("/metrics", async (_req, res) => {
 app.use("/api/feedback", feedbackRoutes);
 
 // IMPORTANT: Company profile routes
-app.use("/api/company/profile", companyRoutes);
+app.use("/api/company", companyRoutes);
 app.use("/api/contests", contestRoutes);
 
 // Root route
